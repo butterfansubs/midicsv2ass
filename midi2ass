@@ -14,7 +14,6 @@ midi_csv="${2-/dev/stdin}"
 [[ -r "$midi_csv" ]] || die "Could not read MIDI CSV file ${midi_csv}."
 
 tmpdir="$(mktemp -d)"
-syllables="${tmpdir}/ktimed-syllables.txt"
 csv_to_ktimes="${tmpdir}/csv-to-ktimes.awk"
 ktimed_syllables_to_ass="${tmpdir}/ktimed-syllables-to-ass.awk"
 
@@ -24,8 +23,37 @@ cleanup() {
 
 trap cleanup EXIT
 
-# CSV to k-times awk script
-cat <<'EOF' >"$csv_to_ktimes"
+######################################################################
+
+main() {
+  local syllables="${tmpdir}/ktimed-syllables.txt"
+
+  add_ktimes_from_midicsv "$lyrics" "$midi_csv" >"$syllables"
+  ktimes_to_ass "$syllables"
+}
+
+add_ktimes_from_midicsv() {
+  local lyrics="$1"
+  local midi_csv="$2"
+
+  awk -F ' *, *' -f "$csv_to_ktimes" "$midi_csv" |
+  paste -d '' - "$lyrics" |
+  paste -d '' -s |
+  tr '#' '\n'
+}
+
+ktimes_to_ass() {
+  local syllables="$1"
+
+  sed 's/}[^{]*{\\k/ + /g; s/^{\\k/0 /; s/}.*/ + 2 k 100.00 \/ p/' "$syllables" |
+  dc |
+  paste -d '#' - "$syllables" |
+  awk -F '#' -f "$ktimed_syllables_to_ass"
+}
+
+prepare_awk_scripts() {
+  # MIDI CSV to k-times, one syllable per line
+  cat <<'EOF' >"$csv_to_ktimes"
 BEGIN { first = 1 }
 /Header/ { ticks = $6 }
 /Tempo/ { tempo = $4 }
@@ -52,8 +80,8 @@ BEGIN { first = 1 }
 END { printf "{\\k%d}\n", note_duration + note_remainder }
 EOF
 
-# k-timed syllables to ASS Dialogue lines awk script
-cat <<'EOF' >"$ktimed_syllables_to_ass"
+  # k-timed syllables (one per line) to ASS Dialogue lines
+  cat <<'EOF' >"$ktimed_syllables_to_ass"
 {
   end = start + $1
   printf "Dialogue: 0,%d:%02d:%02.2f,%d:%02d:%02.2f,Default,,0,0,0,,%s\n",
@@ -67,17 +95,9 @@ cat <<'EOF' >"$ktimed_syllables_to_ass"
   start = end
 }
 EOF
+}
 
-# generate k-timed syllables
-<"$midi_csv" \
-  awk -F ' *, *' -f "$csv_to_ktimes" |
-  paste -d '' - "$lyrics" |
-  tr -d '\n' | tr '#' '\n' \
-  >"$syllables"
+######################################################################
 
-# generate timed ASS Dialogue lines
-<"$syllables" \
-  sed 's/}[^{]*{\\k/ + /g; s/^{\\k/0 /; s/}.*/ + 2 k 100.00 \/ p/' |
-  dc |
-  paste -d '#' - "$syllables" |
-  awk -F '#' -f "$ktimed_syllables_to_ass"
+prepare_awk_scripts
+main
