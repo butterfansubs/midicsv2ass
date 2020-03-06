@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+die() {
+  echo "ERROR:" "$@" "Aborting." >&2
+  exit 1
+}
+
+lyrics="$1"
+midi_csv="${2-/dev/stdin}"
+
+[[ "$midi_csv" = '-' ]] && midi_csv="/dev/stdin"
+
+[[ -r "$lyrics" ]] || die "Could not read lyrics file ${lyrics}."
+[[ -r "$midi_csv" ]] || die "Could not read MIDI CSV file ${midi_csv}."
+
+tmpdir="$(mktemp -d)"
+syllables="${tmpdir}/ktimed-syllables.txt"
+csv_to_ktimes="${tmpdir}/csv-to-ktimes.awk"
+ktimed_syllables_to_ass="${tmpdir}/ktimed-syllables-to-ass.awk"
+
+cleanup() {
+  rm -rf -- "$tmpdir"
+}
+
+trap cleanup EXIT
+
+# CSV to k-times awk script
+cat <<'EOF' >"$csv_to_ktimes"
+BEGIN { first = 1 }
+/Header/ { ticks = $6 }
+/Tempo/ { tempo = $4 }
+/Note_on_c/ {
+  # assume alternating lines of on and off
+  is_on = !is_on
+  if (is_on) {
+    start_time = $2
+    gap = (start_time - end_time) * (tempo / 10000 / ticks) + gap_remainder
+    gap_remainder = gap % 1
+
+    # absorb small gaps into the previous syllable
+    if (gap < 5) note_duration += gap
+    if (!first) printf "{\\k%d}\n", note_duration
+    if (gap >= 5) printf "{\\k%d}", gap
+
+    first = 0
+  } else {
+    end_time = $2
+    note_duration = (end_time - start_time) * (tempo / 10000 / ticks) + note_remainder
+    note_remainder = note_duration % 1
+  }
+}
+END { printf "{\\k%d}\n", note_duration + note_remainder }
+EOF
+
+# k-timed syllables to ASS Dialogue lines awk script
+cat <<'EOF' >"$ktimed_syllables_to_ass"
+{
+  end = start + $1
+  printf "Dialogue: 0,%d:%02d:%02.2f,%d:%02d:%02.2f,Default,,0,0,0,,%s\n",
+    start / 60 / 60,
+    start / 60 % 60,
+    start % 60,
+    end / 60 / 60,
+    end / 60 % 60,
+    end % 60,
+    $2
+  start = end
+}
+EOF
+
+# generate k-timed syllables
+<"$midi_csv" \
+  awk -F ' *, *' -f "$csv_to_ktimes" |
+  paste -d '' - "$lyrics" |
+  tr -d '\n' | tr '#' '\n' \
+  >"$syllables"
+
+# generate timed ASS Dialogue lines
+<"$syllables" \
+  sed 's/}[^{]*{\\k/ + /g; s/^{\\k/0 /; s/}.*/ + 2 k 100.00 \/ p/' |
+  dc |
+  paste -d '#' - "$syllables" |
+  awk -F '#' -f "$ktimed_syllables_to_ass"
