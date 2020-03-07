@@ -5,6 +5,46 @@ die() {
   exit 1
 }
 
+print_usage() {
+  cat <<EOF
+Usage: ${0##*/} lyrics-file [midicsv-file]
+       ${0##*/} -h
+Combines a lyrics file and the output of midicsv to produce k-timed ASS Dialogue
+lines.
+
+If midicsv-file is - or is not given, stdin is read.
+
+The lyrics file is a plain text file, with each line producing an ASS Dialogue
+line in the output. Each syllable is separated by a | character. There should be
+one syllable per MIDI note.
+
+The MIDI file from which the midicsv output is generated is expected to have a
+single voice with no overlapping notes (non-conforming input will produce
+unexpected results). Pitch is not considered, only durations. It is recommended
+to add notes in place of long rests so a blank line will be generated instead of
+extending the start of the next line.
+
+OPTIONS
+EOF
+  sed -n '/^[[:space:]]*#::/s//   /p' "$0"
+}
+
+while getopts h opt; do
+  case "$opt" in
+    #:: -h	Show this help message.
+    h)
+      print_usage
+      exit 0
+      ;;
+    *)
+      print_usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+
 lyrics="$1"
 midi_csv="${2-/dev/stdin}"
 
