@@ -99,7 +99,7 @@ prepare_awk_scripts() {
 BEGIN { first = 1 }
 /Header/ { ticks = $6 }
 /Tempo/ { tempo = $4 }
-/Note_on_c/ {
+/Note_o(n|ff)_c/ {
   # assume alternating lines of on and off
   is_on = !is_on
   if (is_on) {
