@@ -97,9 +97,9 @@ prepare_awk_scripts() {
   # MIDI CSV to k-times, one syllable per line
   cat <<'EOF' >"$csv_to_ktimes"
 BEGIN { first = 1 }
-/Header/ { ticks = $6 }
-/Tempo/ { tempo = $4 }
-/Note_o(n|ff)_c/ {
+/^0,.*Header/ { ticks = $6 }
+/^1,.*Tempo/ { tempo = $4 }
+/^1,.*Note_o(n|ff)_c/ {
   # assume alternating lines of on and off
   is_on = !is_on
   if (is_on) {
