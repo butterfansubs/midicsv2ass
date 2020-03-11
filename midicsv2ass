@@ -107,10 +107,11 @@ BEGIN { first = 1 }
     gap = (start_time - end_time) * (tempo / 10000 / ticks) + gap_remainder
     gap_remainder = gap % 1
 
-    # absorb small gaps into the previous syllable
-    if (gap < 5) note_duration += gap
+    # absorb small gaps (smaller than a 32nd note) into the previous syllable
+    gap_threshold = tempo / 10000 / 8 * 1.5
+    if (gap <= gap_threshold) note_duration += gap
     if (!first) printf "{\\k%d}\n", note_duration
-    if (gap >= 5) printf "{\\k%d}", gap
+    if (gap > gap_threshold) printf "{\\k%d}", gap
 
     first = 0
   } else {
