@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+midi_csv="/dev/stdin"
+
 die() {
   echo "ERROR:" "$@" "Aborting." >&2
   exit 1
@@ -7,12 +9,10 @@ die() {
 
 print_usage() {
   cat <<EOF
-Usage: ${0##*/} lyrics-file [midicsv-file]
+Usage: ${0##*/} [OPTIONS] lyrics-file
        ${0##*/} -h
 Combines a lyrics file and the output of midicsv to produce k-timed ASS Dialogue
 lines.
-
-If midicsv-file is - or is not given, stdin is read.
 
 The lyrics file is a plain text file, with each line producing an ASS Dialogue
 line in the output. Each syllable is separated by a | character. There should be
@@ -29,8 +29,14 @@ EOF
   sed -n '/^[[:space:]]*#::/s//   /p' "$0"
 }
 
-while getopts h opt; do
+while getopts i:h opt; do
   case "$opt" in
+    #:: -i file
+    #:: 	The file containing midicsv output.
+    #:: 	If this flag is absent or if file is -, read stdin.
+    i)
+      [[ "$OPTARG" = '-' ]] || midi_csv="$OPTARG"
+      ;;
     #:: -h	Show this help message.
     h)
       print_usage
@@ -46,9 +52,6 @@ done
 shift $((OPTIND - 1))
 
 lyrics="$1"
-midi_csv="${2-/dev/stdin}"
-
-[[ "$midi_csv" = '-' ]] && midi_csv="/dev/stdin"
 
 [[ -r "$lyrics" ]] || die "Could not read lyrics file ${lyrics}."
 [[ -r "$midi_csv" ]] || die "Could not read MIDI CSV file ${midi_csv}."
