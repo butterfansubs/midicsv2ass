@@ -48,3 +48,8 @@ Syllables on each line are separated by a `|` character.
 There should be one syllable per MIDI note.
 
 See the examples for a sample lyrics file.
+
+## License
+
+This project is licensed under the MIT license.
+See the [LICENSE](./LICENSE) file for details.
