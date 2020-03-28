@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 midi_csv="/dev/stdin"
+keep_empty=0
 
 die() {
   echo "ERROR:" "$@" "Aborting." >&2
@@ -29,13 +30,17 @@ EOF
   sed -n '/^[[:space:]]*#::/s//   /p' "$0"
 }
 
-while getopts i:h opt; do
+while getopts i:eh opt; do
   case "$opt" in
     #:: -i file
     #:: 	The file containing midicsv output.
     #:: 	If this flag is absent or if file is -, read stdin.
     i)
       [[ "$OPTARG" = '-' ]] || midi_csv="$OPTARG"
+      ;;
+    #:: -e	Keep empty lines. They are removed by default.
+    e)
+      keep_empty=1
       ;;
     #:: -h	Show this help message.
     h)
@@ -72,7 +77,12 @@ main() {
   local syllables="${tmpdir}/ktimed-syllables.txt"
 
   add_ktimes_from_midicsv "$lyrics" "$midi_csv" >"$syllables"
-  ktimes_to_ass "$syllables"
+  ktimes_to_ass "$syllables" |
+    if ((keep_empty)); then
+      cat
+    else
+      filter_empty_ass_lines
+    fi
 }
 
 add_ktimes_from_midicsv() {
@@ -94,6 +104,10 @@ ktimes_to_ass() {
   dc |
   paste -d "$separator" - "$syllables" |
   awk -F "$separator" -f "$ktimed_syllables_to_ass"
+}
+
+filter_empty_ass_lines() {
+  sed '/^\([^,]*,\)\{9\}[{}\\k0-9]*$/d'
 }
 
 prepare_awk_scripts() {
