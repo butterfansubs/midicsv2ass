@@ -2,6 +2,7 @@
 
 midi_csv="/dev/stdin"
 keep_empty=0
+start_time=0
 
 die() {
   echo "ERROR:" "$@" "Aborting." >&2
@@ -30,7 +31,7 @@ EOF
   sed -n '/^[[:space:]]*#::/s//   /p' "$0"
 }
 
-while getopts i:eh opt; do
+while getopts i:et:h opt; do
   case "$opt" in
     #:: -i file
     #:: 	The file containing midicsv output.
@@ -41,6 +42,12 @@ while getopts i:eh opt; do
     #:: -e	Keep empty lines. They are removed by default.
     e)
       keep_empty=1
+      ;;
+    #:: -t timestamp
+    #:: 	The start time of the first ASS Dialogue line
+    #:: 	in H:MM:SS.CC format, not validated. Default: 0:00:00.00
+    t)
+      start_time=$(sed 's/^/0 /; s/:/ + 60 * /g; s/$/ + p/' <<<"$OPTARG" | dc)
       ;;
     #:: -h	Show this help message.
     h)
@@ -103,7 +110,7 @@ ktimes_to_ass() {
   sed 's/}[^{]*{\\k/ + /g; s/^{\\k/0 /; s/}.*/ + 2 k 100.00 \/ p/' "$syllables" |
   dc |
   paste -d "$separator" - "$syllables" |
-  awk -F "$separator" -f "$ktimed_syllables_to_ass"
+  awk -F "$separator" -f "$ktimed_syllables_to_ass" -v start="$start_time"
 }
 
 filter_empty_ass_lines() {
