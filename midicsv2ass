@@ -144,7 +144,7 @@ EOF
   cat <<'EOF' >"$ktimed_syllables_to_ass"
 {
   end = start + $1
-  printf "Dialogue: 0,%d:%02d:%02.2f,%d:%02d:%02.2f,Default,,0,0,0,,%s\n",
+  printf "Dialogue: 0,%d:%02d:%05.2f,%d:%02d:%05.2f,%s,,0,0,0,,%s\n",
     start / 60 / 60,
     start / 60 % 60,
     start % 60,
