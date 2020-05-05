@@ -3,6 +3,7 @@
 midi_csv="/dev/stdin"
 keep_empty=0
 start_time=0
+join_punctuation=0
 style="Default"
 
 die() {
@@ -32,7 +33,7 @@ EOF
   sed -n '/^[[:space:]]*#::/s//   /p' "$0"
 }
 
-while getopts i:es:t:h opt; do
+while getopts i:ejs:t:h opt; do
   case "$opt" in
     #:: -i file
     #:: 	The file containing midicsv output.
@@ -43,6 +44,12 @@ while getopts i:es:t:h opt; do
     #:: -e	Keep empty lines. They are removed by default.
     e)
       keep_empty=1
+      ;;
+    #:: -j	Join punctuation. By default, {\k0} is inserted immediately
+    #::   	before non-alphanumeric, non-whitespace characters to exclude it
+    #::   	from the preceding syllable. This flag disables this behavior.
+    j)
+      join_punctuation=1
       ;;
     #:: -s style
     #:: 	The ASS style to use. Default: Default
@@ -102,9 +109,11 @@ add_ktimes_from_midicsv() {
   local lyrics="$1"
   local midi_csv="$2"
   local eol_marker=$'\t'
+  local sed_split='s/$/'"$eol_marker"'/; s/|/\n/g'
+  ((join_punctuation)) || sed_split="${sed_split}"'; s/[^'\''’[:alnum:][:space:]]/{\\k0}&/g'
 
   awk -F ' *, *' -f "$csv_to_ktimes" "$midi_csv" |
-  paste -d '' - <(sed 's/$/'"$eol_marker"'/; s/|/\n/g' "$lyrics") |
+  paste -d '' - <(sed "$sed_split" "$lyrics") |
   tr -d '\n' |
   tr "$eol_marker" '\n'
 }
