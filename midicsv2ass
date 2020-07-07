@@ -143,20 +143,20 @@ BEGIN { first = 1 }
   is_on = !is_on
   if (is_on) {
     start_time = $2
-    gap = (start_time - end_time) * (tempo / 10000 / ticks) + gap_remainder
-    gap_remainder = gap % 1
+    gap = (start_time - end_time) * (tempo / 10000 / ticks) + remainder
+    remainder = gap % 1
 
     # absorb small gaps (smaller than a 32nd note) into the previous syllable
     gap_threshold = tempo / 10000 / 8 * 1.5
-    if (gap <= gap_threshold) note_duration += gap
+    if (gap <= gap_threshold) note_duration = int(note_duration) + gap
     if (!first) printf "{\\k%d}\n", note_duration
     if (gap > gap_threshold) printf "{\\k%d}", gap
 
     first = 0
   } else {
     end_time = $2
-    note_duration = (end_time - start_time) * (tempo / 10000 / ticks) + note_remainder
-    note_remainder = note_duration % 1
+    note_duration = (end_time - start_time) * (tempo / 10000 / ticks) + remainder
+    remainder = note_duration % 1
   }
 }
 END { printf "{\\k%d}\n", note_duration + note_remainder }
