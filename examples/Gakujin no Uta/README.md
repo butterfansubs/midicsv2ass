@@ -5,15 +5,17 @@ This example shows one possible workflow, starting from a full MuseScore 3 file 
 The final lyrics are timed to [【ヤマノススメ】岳人の歌　まとめ](https://youtu.be/hJbxgklq6uU) ("Yama no Susume" Gakujin no Uta compilation) by 笠松翔太 at 0:00:47.01.
 The song is Gakujin no Uta (岳人の歌; Song of the Alpinist), composer and lyricist unknown.
 
-This example makes use of MSCZ files, which can be opened with [MuseScore 3](https://musescore.org/).
+This example makes use of MSCX files, which can be opened with [MuseScore 3](https://musescore.org/).
+When following a similar workflow, MSCZ files maybe used instead of MSCX files.
+The MSCX format is only used because it is more suitable for storage in a Git repository.
 
 ## Example workflow
 
-1. `01 - Gakujin no Uta (full).mscz`: Start with a base file.
+1. `01 - Gakujin no Uta (full).mscx`: Start with a base file.
    This can be an existing arrangement as a MIDI file or as sheet music that you found online.
    If you're starting from scratch, you can skip this step.
-2. `02 - Gakujin no Uta (rhythm).mscz`: Reduce the music down to a rhythm on a single track.
-3. `03 - Gakujin no Uta (rhythm).mid`: Export the MSCZ to MIDI.
+2. `02 - Gakujin no Uta (rhythm).mscx`: Reduce the music down to a rhythm on a single track.
+3. `03 - Gakujin no Uta (rhythm).mid`: Export the MSCX to MIDI.
 4. `04 - Lyrics.txt`: Write the lyrics file, creating one syllable per MIDI note.
 
    `04 - Gakujin no Uta (rhythm).csv`: (Optional) Run `midicsv "03 - Gakujin no Uta (rhythm).mid"` and save the output.
