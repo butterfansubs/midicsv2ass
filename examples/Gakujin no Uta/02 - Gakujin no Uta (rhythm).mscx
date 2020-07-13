@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <museScore version="3.01">
-  <programVersion>3.3.4</programVersion>
-  <programRevision>7684abe</programRevision>
+  <programVersion>3.4.2</programVersion>
+  <programRevision>148e43f</programRevision>
   <Score>
     <LayerTag id="0" tag="default"></LayerTag>
     <currentLayer>0</currentLayer>
@@ -127,9 +127,9 @@ how the notes line up with the syllables.
             <sigD>4</sigD>
             </TimeSig>
           <Tempo>
-            <tempo>1.725</tempo>
+            <tempo>1.71667</tempo>
             <followText>1</followText>
-            <text><b></b><font face="ScoreText"/><b><font face="FreeSerif"/> = 103.5</b></text>
+            <text><b></b><font face="ScoreText"/><b><font face="FreeSerif"/> = 103</b></text>
             </Tempo>
           <RehearsalMark>
             <text>A</text>
@@ -1045,7 +1045,7 @@ how the notes line up with the syllables.
         <Text>
           <style>Frame</style>
           <text><b>Notes
-</b>A. The tempo should be precise, otherwise the timings will drift later and later as the piece goes on.
+</b>A. The tempo should be precise, otherwise the timings will drift as the piece goes on.
 B. Reduce each syllable to a single note spanning the entire duration of the syllable. Ties (but not slurs) are okay
      to have since they will be rendered as a single note when exported to MIDI.
 C. Rests are considered as part of the lead-in to the next syllable, so if the next syllable starts a new line, the new line
