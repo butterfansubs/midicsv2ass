@@ -129,7 +129,7 @@ ktimes_to_ass() {
 }
 
 filter_empty_ass_lines() {
-  sed '/^\([^,]*,\)\{9\}[{}\\k0-9]*$/d'
+  sed '/^\([^,]*,\)\{9\}[[:space:]]*\({\\k[0-9]*}[[:space:]]*\)*$/d'
 }
 
 prepare_awk_scripts() {
