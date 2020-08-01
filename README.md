@@ -49,6 +49,16 @@ There should be one syllable per MIDI note.
 
 See the examples for a sample lyrics file.
 
+#### Splitting syllables
+
+The output of the [`split-syllables`](./split-syllables) script can be used as a starting point to split words into syllables.
+Often, its output cannot be used as-is and will need adjustments to match the actual syllables.
+
+The lyrics file can be provided as an argument to the script or fed in through stdin.
+The processed text will be sent to stdout.
+
+The script is a thin wrapper around `sed` and any arguments passed to the script will be forwarded directly to `sed`.
+
 ## License
 
 This project is licensed under the MIT license.

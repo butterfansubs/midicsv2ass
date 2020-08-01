@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+c_no_n="bcdfghjklmpqrstvwxyz"
+uc_no_n="$(tr a-z A-Z <<<"$c_no_n")"
+v="aeiou"
+uv="$(tr a-z A-Z <<<"$v")"
+
+exec sed -E -e 's/(['"${uc_no_n}${c_no_n}"']*['"${uv}${v}"'Nn]|[Nn][${uv}${v}])[^A-Za-z]*/|&/g; s/^\|//' "$@"
