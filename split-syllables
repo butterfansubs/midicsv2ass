@@ -5,4 +5,4 @@ uc_no_n="$(tr a-z A-Z <<<"$c_no_n")"
 v="aeiou"
 uv="$(tr a-z A-Z <<<"$v")"
 
-exec sed -E -e 's/(['"${uc_no_n}${c_no_n}"']*['"${uv}${v}"'Nn]|[Nn][${uv}${v}])[^A-Za-z]*/|&/g; s/^\|//' "$@"
+exec sed -E -e 's/([Nn][Yy]?['"${uv}${v}"']|['"${uc_no_n}${c_no_n}"']*['"${uv}${v}"'Nn])[^A-Za-z]*/|&/g; s/^\|//' "$@"
