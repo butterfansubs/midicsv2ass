@@ -6,7 +6,7 @@ The final lyrics are timed to [【ヤマノススメ】岳人の歌　まとめ]
 The song is Gakujin no Uta (岳人の歌; Song of the Alpinist), composer and lyricist unknown.
 
 This example makes use of MSCX files, which can be opened with [MuseScore 3](https://musescore.org/).
-When following a similar workflow, MSCZ files maybe used instead of MSCX files.
+When following a similar workflow, MSCZ files may be used instead of MSCX files.
 The MSCX format is only used because it is more suitable for storage in a Git repository.
 
 ## Example workflow
